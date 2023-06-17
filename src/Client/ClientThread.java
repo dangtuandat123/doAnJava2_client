@@ -4,85 +4,232 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class ClientThread extends Thread {
 
 	private Socket client;
 	private DataOutputStream out;
 	private String userName;
-	private String passWord;
 	private DataInputStream in;
 	private String tinNhanNhan;
-	private String tinNhanGui;
-	private String trangThai;
-	private Scanner sc;
+	private ClientGiaoDien clientGiaoDien;
+	private String locTin;
+	private String locTin1;
+	private String time;
+	private String tinNhan;
+	private String user1;
+	private String user2;
 
-	public ClientThread(Socket socket, String userName, String passWord, String trangThai) {
+	public ClientThread(Socket socket, ClientGiaoDien clientGiaoDien) {
+
 		this.client = socket;
+		this.clientGiaoDien = clientGiaoDien;
+
+	}
+
+	public void xuLyDangNhap(String userName, String passWord) {
+
 		this.userName = userName;
-		this.passWord = passWord;
-		this.trangThai = trangThai;
+		
+		try {
+			
+			out.writeUTF("dangNhap");
+			out.writeUTF(userName);
+			out.writeUTF(passWord);
+			String trangThaiDangNhap = in.readUTF();
+			System.out.println(trangThaiDangNhap.equals("thanhcong"));
+			
+			if (trangThaiDangNhap.equals("thanhcong")) {
+				
+				clientGiaoDien.trangNguoiDung();
+				clientGiaoDien.thongBaoDangNhapThanhCong();
+				xuLyServer();
+
+			} else {
+
+				clientGiaoDien.thongBaoDangNhapKhongThanhCong();
+			}
+		} catch (IOException e) {
+			
+		}
+
+	}
+
+	public void xuLyDangKy(String userName, String passWord) {
+		try {
+			
+			out.writeUTF("dangKi");
+			out.writeUTF(userName);
+			out.writeUTF(passWord);
+			
+			// tra ve trang thai dang nhap
+			String trangThaiDangNhap = in.readUTF();
+			System.out.println(trangThaiDangNhap.equals("thanhcong"));
+			if (trangThaiDangNhap.equals("thanhcong")) {
+
+				clientGiaoDien.thongBaoDangKiThanhCong();
+
+			} else {
+
+				clientGiaoDien.thongBaoDangKiKhongThanhCong();
+				
+			}
+		} catch (Exception e) {
+
+		}
+
+	}
+
+	public void xuLyServer() {
+		
+		try {
+			
+			System.out.println(userName);
+			out.writeUTF("nhanThongTin");
+			out.writeUTF(userName);
+			nhanTinNhan();
+
+		} catch (Exception e) {
+			
+		}
+
+	}
+
+	public void guiNhanTinNhan(String tinNhan, String userGui, String userNhan) {
+		
+		try {
+			
+			out.writeUTF("guiTinNhan");
+			out.writeUTF(tinNhan);
+			out.writeUTF(userGui);
+			out.writeUTF(userNhan);
+
+		} catch (Exception e) {
+
+		}
+
+	}
+
+	public void layTinNhanTuServer(String userGui, String userNhan) {
+
+		try {
+			out.writeUTF("layTinNhanTuCSDL");
+			out.writeUTF(userGui);
+			out.writeUTF(userNhan);
+
+		} catch (Exception e) {
+
+		}
+
+	}
+
+	public void timNguoiDung(String str) {
+
+		try {
+			out.writeUTF("timNguoiDung");
+			out.writeUTF(str);
+
+		} catch (Exception e) {
+
+		}
+
 	}
 
 	public void nhanTinNhan() {
+		
 		tinNhanNhan = "";
 		Thread threadDocTinNhan = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				while (!tinNhanNhan.equals("exit")) {
+					
 					try {
 						synchronized (in) {
 							tinNhanNhan = in.readUTF();
+
+							try {
+								
+								locTin = tinNhanNhan.substring(0, 20);
+								locTin1 = tinNhanNhan.substring(0, 4);
+								
+							} catch (Exception e) {
+
+							}
+
+							if (locTin.equals("themNguoiDungVaoList")) {
+								tinNhanNhan = tinNhanNhan.replace("themNguoiDungVaoList ", "");
+								clientGiaoDien.addListNguoiDungOnline(tinNhanNhan);
+
+							} else if (locTin.equals("xoaNguoiDungKhoiList")) {
+								tinNhanNhan = tinNhanNhan.replace("xoaNguoiDungKhoiList ", "");
+								clientGiaoDien.removeList(tinNhanNhan);
+
+							} else if (locTin1.equals("Time")) {
+								
+								try {
+									
+									time = tinNhanNhan.split("\\[")[1].split("]")[0];
+									tinNhan = tinNhanNhan.split("TinNhan\\[")[1].split("]")[0];
+									user1 = tinNhanNhan.split("user1\\[")[1].split("]")[0];
+									user2 = tinNhanNhan.split("user2\\[")[1].split("]")[0];
+									
+								} catch (Exception e) {
+
+								}
+								
+								String output = insertCharacter(tinNhan, "<br>", 42);
+								clientGiaoDien.addTinNhan(output, user1, user2, time);
+
+							} else if (tinNhanNhan.equals("resetMess00000000000")) {
+								clientGiaoDien.resetPanelXemTinNhan();
+
+							} else if (locTin.equals("themNguoiDungcu List")) {
+								tinNhanNhan = tinNhanNhan.replace("themNguoiDungcu List ", "");
+								clientGiaoDien.addListNguoiDungDaNhanTin(tinNhanNhan);
+								
+							} else if (locTin.equals("guiVeNguoiDungCanTim")) {
+								tinNhanNhan = tinNhanNhan.replace("guiVeNguoiDungCanTim ", "");
+								clientGiaoDien.addListTimNguoiDung(tinNhanNhan);
+								
+							} else if (locTin.equals("removeListTimNguoiDu")) {
+								clientGiaoDien.removeListTimNguoiDung();
+								
+							}
+
 						}
 
-//						if(tinNhanNhan=="-----") {
-//							tinNhanNhan = in.readUTF();
-//							System.out.println(tinNhanNhan);
-//							String LuaChon = sc.nextLine();
-//							if(LuaChon.equals("yes")) {
-//								
-//							}
-//							out.writeUTF(tinNhanGui);
-//						}
-
-						System.out.println(tinNhanNhan);
-
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+
 						e.printStackTrace();
 					}
 				}
 
 			}
 		});
+		
 		threadDocTinNhan.start();
+		
 	}
 
-	public void GuiNhanTinNhan() {
+	// them ki tu <br> de tin nhan xuong hang
+	public static String insertCharacter(String input, String character, int interval) {
+		
+		StringBuilder sb = new StringBuilder();
+		int count = 0;
 
-		tinNhanGui = "";
-		Thread threadGuiTinNhan = new Thread(new Runnable() {
+		for (int i = 0; i < input.length(); i++) {
+			
+			sb.append(input.charAt(i));
+			count++;
 
-			@Override
-			public void run() {
-				while (!tinNhanGui.equals("exit")) {
-
-					tinNhanGui = sc.nextLine();
-					try {
-						out.writeUTF(tinNhanGui);
-						System.out.println("Ban: " + tinNhanGui);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-
+			if (count == interval) {
+				sb.append(character);
+				count = 0;
 			}
-		});
+		}
 
-		threadGuiTinNhan.start();
+		return sb.toString();
 	}
 
 	@Override
@@ -91,63 +238,9 @@ public class ClientThread extends Thread {
 		try {
 			in = new DataInputStream(client.getInputStream());
 			out = new DataOutputStream(client.getOutputStream());
-			//
-			sc = new Scanner(System.in);
-
-			// gui userName va pass cho server
-			if (trangThai.equals("dangNhap")) {
-				out.writeUTF(trangThai);
-				out.writeUTF(userName);
-				out.writeUTF(passWord);
-
-				// tra ve trang thai dang nhap
-
-				String trangThaiDangNhap = in.readUTF();
-				System.out.println(trangThaiDangNhap.equals("thanhcong"));
-				if (trangThaiDangNhap.equals("thanhcong")) {
-					ClientGiaoDien clientGiaoDien = new ClientGiaoDien();
-					clientGiaoDien.thongBaoDangNhapThanhCong(userName);
-
-				} else {
-					ClientGiaoDien clientGiaoDien = new ClientGiaoDien();
-					clientGiaoDien.thongBaoDangNhapKhongThanhCong();
-				}
-
-			} else if (trangThai.equals("dangKi")) {
-				out.writeUTF(trangThai);
-				out.writeUTF(userName);
-				out.writeUTF(passWord);
-				// tra ve trang thai dang nhap
-
-				String trangThaiDangNhap = in.readUTF();
-				System.out.println(trangThaiDangNhap.equals("thanhcong"));
-				if (trangThaiDangNhap.equals("thanhcong")) {
-					ClientGiaoDien clientGiaoDien = new ClientGiaoDien();
-					clientGiaoDien.thongBaoDangKiThanhCong();
-
-				} else {
-					ClientGiaoDien clientGiaoDien = new ClientGiaoDien();
-					clientGiaoDien.thongBaoDangKiKhongThanhCong();
-				}
-
-			} else if (trangThai.equals("guiTinNhan")) {
-			
-				out.writeUTF(trangThai);
-				out.writeUTF(userName);
-	
-				System.err.println("Nhap ten nguoi dung muon ket noi");
-				String NguoiDungKetNoi = sc.nextLine();
-
-				out.writeUTF(NguoiDungKetNoi);
-				nhanTinNhan();
-				GuiNhanTinNhan();
-
-			}
-
-			System.out.println("-----------------------");
 
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+
 			e1.printStackTrace();
 		}
 

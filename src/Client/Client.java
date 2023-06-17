@@ -1,45 +1,36 @@
 package Client;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
-import java.util.Scanner;
-
-
 
 public class Client {
 
-
-	private String userName;
-	private String passWord;
-	private String trangThai;
-	
-	public Client(String userName,String passWord, String trangThai) {
-		this.userName = userName;
-		this.passWord = passWord;
-		this.trangThai = trangThai;
+	public Client() {
+		
 	}
 
 	public void ClientStart(String host, int port) {
-		try {
-			Socket client = new Socket(host, port);
-			
-				Thread th = new Thread(new ClientThread(client, userName, passWord, trangThai));
-				th.start();
 		
+		try {
 			
+			Socket client = new Socket(host, port);
+			ClientGiaoDien clientGiaoDien = new ClientGiaoDien();
+			ClientThread clientThread = new ClientThread(client,clientGiaoDien);
+			clientThread.start();
+			clientGiaoDien.nhanThread(clientThread);
+			clientGiaoDien.khoiDong();
+						
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 		}
 
 	}
-
 	public void khoiDong() {
+		
 		try {
-			ClientStart("localhost", 9999);
+			
+			ClientStart("localhost", 6665);
+			
 		} catch (Exception e) {
 
 		}
