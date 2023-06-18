@@ -481,6 +481,9 @@ public class ClientGiaoDien extends JFrame {
 	public void resetPanelXemTinNhan() {
 		jPanel_xemTinNhan.removeAll();
 	}
+	public void resetXemTinNhan() {
+		jPanel_xemTinNhan.repaint();
+	}
 
 	// thêm tin nhắn vào panel
 	public void addTinNhan(String tinNhan, String user1, String user2, String time) {

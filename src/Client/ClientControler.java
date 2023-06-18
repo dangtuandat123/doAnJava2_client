@@ -38,6 +38,7 @@ public class ClientControler implements ActionListener {
 			
 		} else if (suKien.equals("CHỌN")) {
 			
+			clientGiaoDien.resetXemTinNhan();
 			clientGiaoDien.layTinNhanTuCsdl();
 			
 		}
