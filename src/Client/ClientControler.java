@@ -26,7 +26,7 @@ public class ClientControler implements ActionListener {
 			
 		} else if (suKien.equals("ĐĂNG NHẬP")) {
 
-			clientGiaoDien.xuLyDangNhap();
+			clientGiaoDien.xuLyDangNhap(); 
 			
 		} else if (suKien.equals("ĐĂNG KÍ")) {
 

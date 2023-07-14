@@ -6,12 +6,20 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Label;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.File;
+
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -21,6 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileSystemView;
 
 public class ClientGiaoDien extends JFrame {
 
@@ -58,7 +67,7 @@ public class ClientGiaoDien extends JFrame {
 	public ClientGiaoDien() {
 
 	}
-	
+
 	public void nhanThread(ClientThread clientThread) {
 		this.clientThread = clientThread;
 	}
@@ -74,7 +83,7 @@ public class ClientGiaoDien extends JFrame {
 		this.add(jPanel_dangNhap);
 		this.setVisible(true);
 		dangNhap();
-		
+
 	}
 
 	// form đăng nhập
@@ -148,7 +157,7 @@ public class ClientGiaoDien extends JFrame {
 		Font font = new Font("Arial", Font.BOLD, 30);
 		Font font2 = new Font("Arial", Font.BOLD, 30);
 
-		//lable dang ki
+		// lable dang ki
 		JLabel jLabel_tieude = new JLabel("ĐĂNG KÍ", JLabel.CENTER);
 		jPanel_tieuDe.add(jLabel_tieude);
 		jLabel_tieude.setFont(font);
@@ -238,33 +247,33 @@ public class ClientGiaoDien extends JFrame {
 
 	// hàm xử lý đăng kí
 	public void xuLyDangKi() {
-		
+
 		userName = jTextField_tenDangNhap.getText();
 		passWord = jTextField_matKhau.getText();
 		passWordAgain = jTextField_nhapLaiMatKhau.getText();
-		
+
 		if (passWord.equals(passWordAgain)) {
 			clientThread.xuLyDangKy(userName, passWord);
 
 		} else {
-			
+
 			Color mauDo = new Color(255, 0, 0);
 			thongBao("Nhập lại mật khẩu sai!", mauDo);
-			
+
 		}
 
 	}
 
 	// hàm bật thông báo khi đăng kí
 	public void thongBaoDangKiThanhCong() {
-		
+
 		mauXanh = new Color(90, 196, 70);
 		thongBao("Đăng kí thành công!", mauXanh);
 
 	}
 
 	public void thongBaoDangKiKhongThanhCong() {
-		
+
 		Color mauDo = new Color(255, 0, 0);
 		thongBao("Tên người dùng đã tồn tại!", mauDo);
 
@@ -272,7 +281,7 @@ public class ClientGiaoDien extends JFrame {
 
 	// hiển thị list người dùng đang online
 	public void hienThiDanhSachNguoiDung() {
-		
+
 		JLabel jLabel_danhSachNguoiDung = new JLabel("NGƯỜI DÙNG ONLINE");
 		Font font = new Font("Arial", Font.BOLD, 18);
 		jLabel_danhSachNguoiDung.setFont(font);
@@ -307,18 +316,17 @@ public class ClientGiaoDien extends JFrame {
 		jPanel_jlistVaLable2.add(jLabel_danhSachNguoiDung, BorderLayout.NORTH);
 		jPanel_jlistVaLable2.add(jc, BorderLayout.CENTER);
 		jPanel_listChat.add(jPanel_jlistVaLable2);
-		
-		
+
 	}
 
 	public void addListNguoiDungOnline(String user) {
-		
+
 		if (user.equals(userName)) {
 			return;
 		}
 
 		if (!listModel.contains(user)) {
-			
+
 			listModel.addElement(user);
 
 		} else {
@@ -328,18 +336,17 @@ public class ClientGiaoDien extends JFrame {
 	}
 
 	public void addListNguoiDungDaNhanTin(String user) {
-		
+
 		if (user.equals(userName)) {
-			
+
 			return;
 		}
 
 		if (!listModel2.contains(user)) {
-			
+
 			System.out.println(user);
 			listModel2.addElement(user);
-			
-			
+
 		} else {
 
 		}
@@ -354,7 +361,7 @@ public class ClientGiaoDien extends JFrame {
 
 	// tìm user
 	public void timUser() {
-		
+
 		jPanel_timNguoiDung = new JPanel();
 		jPanel_timNguoiDung.setLayout(new BorderLayout());
 		jPanel_listChat.add(jPanel_timNguoiDung);
@@ -406,11 +413,11 @@ public class ClientGiaoDien extends JFrame {
 	public void addListTimNguoiDung(String user) {
 
 		if (!user.equals(userName)) {
-			
+
 			listModel3.addElement(user);
 
 		}
-		
+
 		this.repaint();
 		this.revalidate();
 
@@ -426,9 +433,9 @@ public class ClientGiaoDien extends JFrame {
 
 	// hàm gửi tin nhắn
 	public void guiTinNhan() {
-		
+
 		String tinNhan = jTextField_nhapTinNhan.getText();
-		
+
 		if (!tinNhan.equals("")) {
 			jTextField_nhapTinNhan.setText("");
 			if (userNameNhanTinNhan != null) {
@@ -446,29 +453,32 @@ public class ClientGiaoDien extends JFrame {
 	// hàm nhận tin từ csdl
 	public void layTinNhanTuCsdl() {
 		resetPanelXemTinNhan();
-		if (jList_danhSachNguoiDung.getSelectedValue() == null && jList_danhSachNguoiDungDaKetNoi.getSelectedValue() == null && jList_timNguoiDung.getSelectedValue() == null) {
+		if (jList_danhSachNguoiDung.getSelectedValue() == null
+				&& jList_danhSachNguoiDungDaKetNoi.getSelectedValue() == null
+				&& jList_timNguoiDung.getSelectedValue() == null) {
 			thongBao("Vui lòng chọn người chat!", mauDo);
 		}
 		if (jList_danhSachNguoiDungDaKetNoi.getSelectedValue() != null) {
-			
+
 			userNameNhanTinNhan = jList_danhSachNguoiDungDaKetNoi.getSelectedValue();
-			jLabel_nguoiDungDangChat.setText("BẠN ĐANG CHAT VỚI: " + jList_danhSachNguoiDungDaKetNoi.getSelectedValue());
+			jLabel_nguoiDungDangChat
+					.setText("BẠN ĐANG CHAT VỚI: " + jList_danhSachNguoiDungDaKetNoi.getSelectedValue());
 			clientThread.layTinNhanTuServer(userName, userNameNhanTinNhan);
 
 		}
 		if (jList_danhSachNguoiDung.getSelectedValue() != null) {
-			
+
 			userNameNhanTinNhan = jList_danhSachNguoiDung.getSelectedValue();
 			jLabel_nguoiDungDangChat.setText("BẠN ĐANG CHAT VỚI: " + jList_danhSachNguoiDung.getSelectedValue());
 			clientThread.layTinNhanTuServer(userName, userNameNhanTinNhan);
-			
+
 		}
 		if (jList_timNguoiDung.getSelectedValue() != null) {
-			
+
 			userNameNhanTinNhan = jList_timNguoiDung.getSelectedValue();
 			jLabel_nguoiDungDangChat.setText("BẠN ĐANG CHAT VỚI: " + jList_timNguoiDung.getSelectedValue());
 			clientThread.layTinNhanTuServer(userName, userNameNhanTinNhan);
-			
+
 		}
 
 		jList_danhSachNguoiDungDaKetNoi.clearSelection();
@@ -481,70 +491,335 @@ public class ClientGiaoDien extends JFrame {
 	public void resetPanelXemTinNhan() {
 		jPanel_xemTinNhan.removeAll();
 	}
+
 	public void resetXemTinNhan() {
 		jPanel_xemTinNhan.repaint();
 	}
 
 	// thêm tin nhắn vào panel
-	public void addTinNhan(String tinNhan, String user1, String user2, String time) {
+	public void addTinNhan(String tinNhan, String user1, String user2, String time, String duongDanFile) {
 
 		if (user2.equals(userNameNhanTinNhan) || user1.equals(userNameNhanTinNhan)) {
 			if (user1.equals(userName)) {
-				JPanel jPanel_tinNhan = new JPanel();
-				JLabel jLabel_tinNhan = new JLabel(
-						"<html><body style='width: 375px;margin: 5px;background: #ededed; font-size: 15px;'><p>"
-								+ tinNhan + "</p><div style='font-size: 10px;color: #757373;'>" + time
-								+ "</div></body></html>");
+				if (!duongDanFile.equals("null")) {
 
-				Color mau1 = new Color(0, 151, 178);
-				jPanel_tinNhan.setBackground(mau1);
-				jPanel_tinNhan.setLayout(new GridLayout(1, 2));
+					String filePath = duongDanFile;
+					File file = new File(filePath);
+					String output = file.getName();
+					String fileName = insertCharacter(output, "<br>", 35);
 
-				JPanel jPanel_tam = new JPanel();
+					JPanel jPanel_tinNhan = new JPanel();
+					JLabel jLabel_tinNhan = new JLabel(
+							"<html><body style='width: 325px;margin: 5px;background: #ededed; font-size: 15px;'><p style='color: blue'>"
+									+ fileName + "</p><div style='font-size: 10px;color: #757373;'>" + time
+									+ "</div></body></html>");
+					ImageIcon icon = new ImageIcon("img/file.png");
+					Image image = icon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+					ImageIcon scaledIcon = new ImageIcon(image);
 
-				jPanel_tinNhan.add(jPanel_tam);
-				jPanel_tam.setBackground(mau1);
-				JPanel jPanel_tam2 = new JPanel();
-				jPanel_tam2.setBackground(mau1);
+					jLabel_tinNhan.setIcon(scaledIcon);
 
-				jPanel_tam2.add(jLabel_tinNhan);
-				jPanel_tinNhan.add(jPanel_tam2);
+					jLabel_tinNhan.addMouseListener(new MouseListener() {
 
-				jPanel_xemTinNhan.add(jPanel_tinNhan, 0);
+						@Override
+						public void mouseClicked(MouseEvent e) {
 
-				jPanel_tinNhan.setBackground(Color.WHITE);
-				// luot jscrollpane xuong duoi cung
-				int height = (int) jPanel_xemTinNhan.getPreferredSize().getHeight();
-				Rectangle rect = new Rectangle(0, height, 10, 10);
-				jPanel_xemTinNhan.scrollRectToVisible(rect);
+							String Time = time;
+							Time = Time.replace("-", " ");
+							Time = Time.replace(".", " ");
+							Time = Time.replace(":", " ");
+
+							String duongDan = "File\\" + user1 + "\\" + Time + "\\" + output;
+							System.out.println(duongDan);
+
+							JFileChooser fileChooser = new JFileChooser(
+									FileSystemView.getFileSystemView().getHomeDirectory());
+							fileChooser.setDialogTitle("Chọn thư mục lưu");
+							fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+							// Hiển thị hộp thoại chọn thư mục
+							int returnValue = fileChooser.showOpenDialog(null);
+							if (returnValue == JFileChooser.APPROVE_OPTION) {
+								// Lấy đường dẫn đến thư mục đã chọn
+								String selectedFolderPath = fileChooser.getSelectedFile().getAbsolutePath();
+								selectedFolderPath.replace("\\", "/");
+								System.out.println("Thư mục đã chọn: " + selectedFolderPath);
+
+								clientThread.nhanThongTinFile(duongDan, selectedFolderPath, output);
+							} else {
+								System.out.println("Không có thư mục nào được chọn.");
+							}
+
+						}
+
+						@Override
+						public void mousePressed(MouseEvent e) {
+							// TODO Auto-generated method stub
+
+						}
+
+						@Override
+						public void mouseReleased(MouseEvent e) {
+							// TODO Auto-generated method stub
+
+						}
+
+						@Override
+						public void mouseEntered(MouseEvent e) {
+							// TODO Auto-generated method stub
+
+						}
+
+						@Override
+						public void mouseExited(MouseEvent e) {
+							// TODO Auto-generated method stub
+
+						}
+					});
+
+					Color mau1 = new Color(0, 151, 178);
+					jPanel_tinNhan.setBackground(mau1);
+					jPanel_tinNhan.setLayout(new GridLayout(1, 2));
+
+					JPanel jPanel_tam = new JPanel();
+
+					jPanel_tinNhan.add(jPanel_tam);
+					jPanel_tam.setBackground(mau1);
+					JPanel jPanel_tam2 = new JPanel();
+					jPanel_tam2.setBackground(mau1);
+
+					jPanel_tam2.add(jLabel_tinNhan);
+
+					jPanel_tinNhan.add(jPanel_tam2);
+
+					jPanel_xemTinNhan.add(jPanel_tinNhan);
+
+					jPanel_tinNhan.setBackground(Color.WHITE);
+					// luot jscrollpane xuong duoi cung
+					int height = (int) jPanel_xemTinNhan.getPreferredSize().getHeight();
+					Rectangle rect = new Rectangle(0, height, 10, 10);
+					jPanel_xemTinNhan.scrollRectToVisible(rect);
+
+				} else {
+					JPanel jPanel_tinNhan = new JPanel();
+
+					String checkTn = tinNhan.substring(1, Math.min(tinNhan.length(), 5));
+					if (checkTn.equals(".png")) {
+						JLabel jLabel_icon1 = new JLabel(
+								"<html><body style='width: 330px;margin:5px;padding: 0;background: #ededed; font-size: 15px;'><p></p><div style='font-size: 10px;color: #757373;'>"
+										+ time + "</div></body></html>");
+						jLabel_icon1.setBackground(Color.WHITE);
+						ImageIcon icon1 = new ImageIcon("img/icon/" + tinNhan);
+						jLabel_icon1.setIcon(icon1);
+
+						Color mau1 = new Color(0, 151, 178);
+						jPanel_tinNhan.setBackground(mau1);
+						jPanel_tinNhan.setLayout(new GridLayout(1, 2));
+
+						JPanel jPanel_tam = new JPanel();
+
+						jPanel_tinNhan.add(jPanel_tam);
+						jPanel_tam.setBackground(mau1);
+						JPanel jPanel_tam2 = new JPanel();
+						jPanel_tam2.setBackground(mau1);
+
+						jPanel_tam2.add(jLabel_icon1);
+
+						jPanel_tinNhan.add(jPanel_tam2);
+
+						jPanel_xemTinNhan.add(jPanel_tinNhan);
+
+						jPanel_tinNhan.setBackground(Color.WHITE);
+						// luot jscrollpane xuong duoi cung
+						int height = (int) jPanel_xemTinNhan.getPreferredSize().getHeight();
+						Rectangle rect = new Rectangle(0, height, 10, 10);
+						jPanel_xemTinNhan.scrollRectToVisible(rect);
+
+					} else {
+						JLabel jLabel_tinNhan = new JLabel(
+								"<html><body style='width: 375px;margin: 5px;background: #ededed; font-size: 15px;'><p>"
+										+ tinNhan + "</p><div style='font-size: 10px;color: #757373;'>" + time
+										+ "</div></body></html>");
+						Color mau1 = new Color(0, 151, 178);
+						jPanel_tinNhan.setBackground(mau1);
+						jPanel_tinNhan.setLayout(new GridLayout(1, 2));
+
+						JPanel jPanel_tam = new JPanel();
+
+						jPanel_tinNhan.add(jPanel_tam);
+						jPanel_tam.setBackground(mau1);
+						JPanel jPanel_tam2 = new JPanel();
+						jPanel_tam2.setBackground(mau1);
+
+						jPanel_tam2.add(jLabel_tinNhan);
+
+						jPanel_tinNhan.add(jPanel_tam2);
+
+						jPanel_xemTinNhan.add(jPanel_tinNhan);
+
+						jPanel_tinNhan.setBackground(Color.WHITE);
+						// luot jscrollpane xuong duoi cung
+						int height = (int) jPanel_xemTinNhan.getPreferredSize().getHeight();
+						Rectangle rect = new Rectangle(0, height, 10, 10);
+						jPanel_xemTinNhan.scrollRectToVisible(rect);
+					}
+
+				}
 
 			} else {
 
-				JPanel jPanel_tinNhan = new JPanel();
-				JLabel jLabel_tinNhan = new JLabel(
-						"<html><body style='width: 375px;margin: 5px;background: #7ee0db; font-size: 15px;'><p>"
-								+ tinNhan + "</p><div style='font-size: 10px;color: #757373;'>" + time
-								+ "</div></body></html>");
+				if (!duongDanFile.equals("null")) {
 
-				Color mau1 = new Color(0, 151, 178);
+					String filePath = duongDanFile;
+					File file = new File(filePath);
+					String output = file.getName();
+					String fileName = insertCharacter(output, "<br>", 35);
 
-				jPanel_tinNhan.setLayout(new GridLayout(1, 2));
-				JPanel jPanel_tam = new JPanel();
-				jPanel_tam.setBackground(mau1);
-				JPanel jPanel_tam2 = new JPanel();
-				jPanel_tam2.setBackground(mau1);
+					JPanel jPanel_tinNhan = new JPanel();
+					JLabel jLabel_tinNhan = new JLabel(
+							"<html><body style='width: 325px;margin: 5px;background: #7ee0db; font-size: 15px;'><p style='color: blue'>"
+									+ fileName + "</p><div style='font-size: 10px;color: #757373;'>" + time
+									+ "</div></body></html>");
+					ImageIcon icon = new ImageIcon("img/file.png");
+					Image image = icon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+					ImageIcon scaledIcon = new ImageIcon(image);
+					jLabel_tinNhan.setIcon(scaledIcon);
+					jLabel_tinNhan.addMouseListener(new MouseListener() {
 
-				jPanel_tam2.add(jLabel_tinNhan);
-				jPanel_tinNhan.add(jPanel_tam2);
-				jPanel_tinNhan.add(jPanel_tam);
+						@Override
+						public void mouseClicked(MouseEvent e) {
 
-				jPanel_xemTinNhan.add(jPanel_tinNhan, 0);
+							String Time = time;
+							Time = Time.replace("-", " ");
+							Time = Time.replace(".", " ");
+							Time = Time.replace(":", " ");
 
-				jPanel_tinNhan.setBackground(Color.gray);
-				// luot jscrollpane xuong duoi cung
-				int height = (int) jPanel_xemTinNhan.getPreferredSize().getHeight();
-				Rectangle rect = new Rectangle(0, height, 10, 10);
-				jPanel_xemTinNhan.scrollRectToVisible(rect);
+							String duongDan = "File\\" + user1 + "\\" + Time + "\\" + output;
+							System.out.println(duongDan);
+
+							JFileChooser fileChooser = new JFileChooser(
+									FileSystemView.getFileSystemView().getHomeDirectory());
+							fileChooser.setDialogTitle("Chọn thư mục lưu");
+							fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+							// Hiển thị hộp thoại chọn thư mục
+							int returnValue = fileChooser.showOpenDialog(null);
+							if (returnValue == JFileChooser.APPROVE_OPTION) {
+								// Lấy đường dẫn đến thư mục đã chọn
+								String selectedFolderPath = fileChooser.getSelectedFile().getAbsolutePath();
+								selectedFolderPath.replace("\\", "/");
+								System.out.println("Thư mục đã chọn: " + selectedFolderPath);
+
+								clientThread.nhanThongTinFile(duongDan, selectedFolderPath, output);
+							} else {
+								System.out.println("Không có thư mục nào được chọn.");
+							}
+
+						}
+
+						@Override
+						public void mousePressed(MouseEvent e) {
+							// TODO Auto-generated method stub
+
+						}
+
+						@Override
+						public void mouseReleased(MouseEvent e) {
+							// TODO Auto-generated method stub
+
+						}
+
+						@Override
+						public void mouseEntered(MouseEvent e) {
+							// TODO Auto-generated method stub
+
+						}
+
+						@Override
+						public void mouseExited(MouseEvent e) {
+							// TODO Auto-generated method stub
+
+						}
+					});
+
+					Color mau1 = new Color(0, 151, 178);
+
+					jPanel_tinNhan.setLayout(new GridLayout(1, 2));
+					JPanel jPanel_tam = new JPanel();
+					jPanel_tam.setBackground(mau1);
+					JPanel jPanel_tam2 = new JPanel();
+					jPanel_tam2.setBackground(mau1);
+
+					jPanel_tam2.add(jLabel_tinNhan);
+					jPanel_tinNhan.add(jPanel_tam2);
+					jPanel_tinNhan.add(jPanel_tam);
+
+					jPanel_xemTinNhan.add(jPanel_tinNhan);
+
+					jPanel_tinNhan.setBackground(Color.gray);
+					// luot jscrollpane xuong duoi cung
+					int height = (int) jPanel_xemTinNhan.getPreferredSize().getHeight();
+					Rectangle rect = new Rectangle(0, height, 10, 10);
+					jPanel_xemTinNhan.scrollRectToVisible(rect);
+
+				} else {
+					JPanel jPanel_tinNhan = new JPanel(); 
+
+					String checkTn = tinNhan.substring(1, Math.min(tinNhan.length(), 5));
+					if (checkTn.equals(".png")) {
+						JLabel jLabel_icon1 = new JLabel(
+								"<html><body style='width: 330px;margin:5px;padding: 0;background: #7ee0db; font-size: 15px;'><p></p><div style='font-size: 10px;color: #757373;'>"
+										+ time + "</div></body></html>");
+						Color mau1 = new Color(0, 151, 178);
+						ImageIcon icon1 = new ImageIcon("img/icon/" + tinNhan);
+						jLabel_icon1.setIcon(icon1);
+
+						jPanel_tinNhan.setLayout(new GridLayout(1, 2));
+						JPanel jPanel_tam = new JPanel();
+						jPanel_tam.setBackground(mau1);
+						JPanel jPanel_tam2 = new JPanel();
+						jPanel_tam2.setBackground(mau1);
+
+						jPanel_tam2.add(jLabel_icon1);
+						jPanel_tinNhan.add(jPanel_tam2);
+						jPanel_tinNhan.add(jPanel_tam);
+
+						jPanel_xemTinNhan.add(jPanel_tinNhan);
+
+						jPanel_tinNhan.setBackground(Color.gray);
+						// luot jscrollpane xuong duoi cung
+						int height = (int) jPanel_xemTinNhan.getPreferredSize().getHeight();
+						Rectangle rect = new Rectangle(0, height, 10, 10);
+						jPanel_xemTinNhan.scrollRectToVisible(rect);
+
+					} else {
+						
+						JLabel jLabel_tinNhan = new JLabel(
+								"<html><body style='width: 375px;margin: 5px;background: #7ee0db; font-size: 15px;'><p>"
+										+ tinNhan + "</p><div style='font-size: 10px;color: #757373;'>" + time
+										+ "</div></body></html>");
+
+						Color mau1 = new Color(0, 151, 178);
+
+						jPanel_tinNhan.setLayout(new GridLayout(1, 2));
+						JPanel jPanel_tam = new JPanel();
+						jPanel_tam.setBackground(mau1);
+						JPanel jPanel_tam2 = new JPanel();
+						jPanel_tam2.setBackground(mau1);
+
+						jPanel_tam2.add(jLabel_tinNhan);
+						jPanel_tinNhan.add(jPanel_tam2);
+						jPanel_tinNhan.add(jPanel_tam);
+
+						jPanel_xemTinNhan.add(jPanel_tinNhan);
+
+						jPanel_tinNhan.setBackground(Color.gray);
+						// luot jscrollpane xuong duoi cung
+						int height = (int) jPanel_xemTinNhan.getPreferredSize().getHeight();
+						Rectangle rect = new Rectangle(0, height, 10, 10);
+						jPanel_xemTinNhan.scrollRectToVisible(rect);
+					}
+				}
 
 			}
 
@@ -552,9 +827,29 @@ public class ClientGiaoDien extends JFrame {
 
 	}
 
+	// them ki tu <br> de tin nhan xuong hang
+	public static String insertCharacter(String input, String character, int interval) {
+
+		StringBuilder sb = new StringBuilder();
+		int count = 0;
+
+		for (int i = 0; i < input.length(); i++) {
+
+			sb.append(input.charAt(i));
+			count++;
+
+			if (count == interval) {
+				sb.append(character);
+				count = 0;
+			}
+		}
+
+		return sb.toString();
+	}
+
 	// form giao diện người dùng
 	public void trangNguoiDung() {
-		
+
 		Color mau1 = new Color(0, 151, 178);
 
 		ActionListener ac = new ClientControler(this);
@@ -605,21 +900,298 @@ public class ClientGiaoDien extends JFrame {
 		JPanel jPanel_chat = new JPanel();
 		jPanel_chat.setLayout(new BorderLayout());
 		jPanel_trangChinh.add(jPanel_chat, BorderLayout.SOUTH);
+
 		JPanel jPanel_thaoTacChat = new JPanel();
-		jPanel_chat.add(jPanel_thaoTacChat, BorderLayout.CENTER);
+		jPanel_thaoTacChat.setLayout(new BorderLayout());
+		jPanel_chat.add(jPanel_thaoTacChat, BorderLayout.WEST);
 		jPanel_thaoTacChat.setBackground(Color.green);
-		jPanel_thaoTacChat.setPreferredSize(new Dimension(1080, 100));
+		jPanel_thaoTacChat.setPreferredSize(new Dimension(880, 100));
 		jTextField_nhapTinNhan = new JTextField();
 		jTextField_nhapTinNhan.setFont(new Font("Arial", 30, 50));
 		jPanel_thaoTacChat.setLayout(new GridLayout(1, 1));
-		jPanel_thaoTacChat.add(jTextField_nhapTinNhan);
-
+		jPanel_thaoTacChat.add(jTextField_nhapTinNhan, BorderLayout.CENTER);
+		// nut gui tin
 		JButton jButton_guiTinNhan = new JButton("GỬI");
 		jButton_guiTinNhan.setBackground(new Color(88, 255, 155));
 		jPanel_chat.add(jButton_guiTinNhan, BorderLayout.EAST);
 		jButton_guiTinNhan.setPreferredSize(new Dimension(100, 100));
 		jButton_guiTinNhan.addActionListener(ac);
+		// nut chon file
 
+		ImageIcon icon = new ImageIcon("img/paper-clip.png");
+		Image image = icon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+		ImageIcon scaledIcon = new ImageIcon(image);
+		JButton jButton_chonFile = new JButton();
+		JLabel jLabel_chonFile = new JLabel();
+		jButton_chonFile.setIcon(scaledIcon);
+		jButton_chonFile.setBackground(new Color(88, 255, 155));
+		jPanel_chat.add(jButton_chonFile, BorderLayout.CENTER);
+		jButton_chonFile.setPreferredSize(new Dimension(100, 100));
+
+		jButton_chonFile.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setDialogTitle("Chọn file");
+				int returnValue = fileChooser.showOpenDialog(null);
+				if (returnValue == JFileChooser.APPROVE_OPTION) {
+					File selectedFile = fileChooser.getSelectedFile();
+					String filePath = selectedFile.getAbsolutePath().replace("\\", "\\\\");
+					clientThread.guiFile(filePath, userName, userNameNhanTinNhan);
+					System.out.println(filePath);
+
+				}
+
+			}
+		});
+		// jpan chon icon
+		JPanel jPanel_chonIcon = new JPanel();
+		jPanel_chonIcon.setPreferredSize(new Dimension(880, 60));
+		jPanel_chonIcon.setLayout(new GridLayout(1, 6));
+		// icon1
+		JLabel jLabel_icon1 = new JLabel();
+		jLabel_icon1.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (userNameNhanTinNhan != null) {
+					clientThread.guiNhanTinNhan("1.png", userName, userNameNhanTinNhan);
+				} else {
+					thongBao("Vui lòng chọn người chat!", Color.RED);
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		ImageIcon icon1 = new ImageIcon("img/icon/1.png");
+		jLabel_icon1.setIcon(icon1);
+		jPanel_chonIcon.add(jLabel_icon1);
+		// icon2
+		JLabel jLabel_icon2 = new JLabel();
+		jLabel_icon2.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (userNameNhanTinNhan != null) {
+					clientThread.guiNhanTinNhan("2.png", userName, userNameNhanTinNhan);
+				} else {
+					thongBao("Vui lòng chọn người chat!", Color.RED);
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		ImageIcon icon2 = new ImageIcon("img/icon/2.png");
+		jLabel_icon2.setIcon(icon2);
+		jPanel_chonIcon.add(jLabel_icon2);
+		// icon3
+		JLabel jLabel_icon3 = new JLabel();
+		jLabel_icon3.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (userNameNhanTinNhan != null) {
+					clientThread.guiNhanTinNhan("3.png", userName, userNameNhanTinNhan);
+				} else {
+					thongBao("Vui lòng chọn người chat!", Color.RED);
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		ImageIcon icon3 = new ImageIcon("img/icon/3.png");
+		jLabel_icon3.setIcon(icon3);
+		jPanel_chonIcon.add(jLabel_icon3);
+		// icon4
+		JLabel jLabel_icon4 = new JLabel();
+		jLabel_icon4.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (userNameNhanTinNhan != null) {
+					clientThread.guiNhanTinNhan("4.png", userName, userNameNhanTinNhan);
+				} else {
+					thongBao("Vui lòng chọn người chat!", Color.RED);
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		ImageIcon icon4 = new ImageIcon("img/icon/4.png");
+		jLabel_icon4.setIcon(icon4);
+		jPanel_chonIcon.add(jLabel_icon4);
+		// icon5
+		JLabel jLabel_icon5 = new JLabel();
+		jLabel_icon5.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (userNameNhanTinNhan != null) {
+					clientThread.guiNhanTinNhan("5.png", userName, userNameNhanTinNhan);
+				} else {
+					thongBao("Vui lòng chọn người chat!", Color.RED);
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		ImageIcon icon5 = new ImageIcon("img/icon/5.png");
+		jLabel_icon5.setIcon(icon5);
+		jPanel_chonIcon.add(jLabel_icon5);
+		// icon6
+		JLabel jLabel_icon6 = new JLabel();
+		jLabel_icon6.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (userNameNhanTinNhan != null) {
+					clientThread.guiNhanTinNhan("6.png", userName, userNameNhanTinNhan);
+				} else {
+					thongBao("Vui lòng chọn người chat!", Color.RED);
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		ImageIcon icon6 = new ImageIcon("img/icon/6.png");
+		jLabel_icon6.setIcon(icon6);
+		jPanel_chonIcon.add(jLabel_icon6);
+
+		jPanel_chat.add(jPanel_chonIcon, BorderLayout.NORTH);
 		// jpanel xem tin nhan
 
 		jPanel_xemTinNhan = new JPanel();
